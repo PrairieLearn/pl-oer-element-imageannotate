@@ -35,7 +35,7 @@ This element allows students to upload images and mark areas with pre-defined, r
 ### Element Attributes
 
 | Attribute      | Type | Description                                  
-|----------------|-------------------------------------------------
+|----------------|------|-------------------------------------------
 | `answer-name`  | string (required) |  Unique identifier for the annotation instance   
 | `width`        | integer (default: `500`) | Width of the annotated image container in pixels
 | `height`       | integer (default: `100`) | Default height of the annotated image container in pixels; will be adjusted based on the aspect ratio of the uploaded image 
