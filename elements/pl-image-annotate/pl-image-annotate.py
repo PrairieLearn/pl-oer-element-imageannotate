@@ -60,8 +60,8 @@ def extract_rectangle_annotations(element) -> list[dict]:
             'label': label,
             'key': key,
             'annotation_name': annotation_name,
-            'font_size': rect.get('font_size', '14'),
-            'border_width': rect.get('border_width', '2'),
+            'font_size': rect.get('font-size', '14'),
+            'border_width': rect.get('border-width', '2'),
         }
         annotations.append(annotation)
     return annotations
@@ -77,7 +77,7 @@ def prepare(element_html: str, data: pl.QuestionData) -> None:
 
     # Check subelements
     subelement_required_attribs = ["label", "key"]
-    subelement_optional_attribs = ["color", "width", "height", "resizable", "font_size", "border_width", "required"]
+    subelement_optional_attribs = ["color", "width", "height", "resizable", "font-size", "border-width", "required"]
 
     keys = set()
     for subelement in element.findall("pl-rectangle-annotate"):
@@ -132,7 +132,7 @@ def render(element_html: str, data: pl.QuestionData) -> str:
         saved_state = {}
         submitted_answers = data["submitted_answers"].get(answer_name, None)
 
-        hint = "You need to upload a file before you can annotate it, then click the annotation button to start annotating on canvas."
+        hint = "You must upload an image first before you can annotate it. Click the corresponding button to add an annotation to the canvas, then drag and resize the rectangle."
         info_params = {"format": True, "hint": hint}
         info = chevron.render(template, info_params).strip()
 

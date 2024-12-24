@@ -1,33 +1,95 @@
-<pl-image-annotate answer-name="test" width="500px" height="300px">
-  <pl-rectangle-annotate
-    label="Destination&#10;MAC"
-    key="destination_mac"
-    color="red"
-    width="200"
-    height="100"
-    resizable="true"
-    font_size="16"
-    border_width="3"
-    required="true"
-  ></pl-rectangle-annotate>
-  <pl-rectangle-annotate
-    label="Frame Type"
-    key="frame_type"
-    color="blue"
-    width="100"
-    height="100"
-    resizable="true"
-    font_size="16"
-    border_width="3"
-  ></pl-rectangle-annotate>
-  <pl-rectangle-annotate
-    label="Test"
-    key="test"
-    color="blue"
-    width="100"
-    height="100"
-    resizable="true"
-    font_size="25"
-    border_width="6"
-  ></pl-rectangle-annotate>
+<pl-question-panel>
+  <p>
+    The questions below were designed to showcase the different features of
+    <code>pl-image-annotate</code>. This element allows students to upload an image and then
+    add rectangular annotations to it that highlight specific areas.
+  </p>
+</pl-question-panel>
+
+<div class="card my-2">
+  <div class="card-header">Part 1</div>
+  <div class="card-body">
+    <pl-question-panel>
+    <p>Annotation types are pre-defined by placing one or more <code>pl-rectangle-annotate</code> 
+      elements inside <code>pl-image-annotate</code>. Each type needs a unique <code>key</code>
+      for internal use and a <code>label</code> that is displayed to students. Only one annotation
+      per type can be placed, and annotations can be place and removed by clicking the 
+      corresponding button.</p>
+    </pl-question-panel>
+  <pl-image-annotate answer-name="q1">
+    <pl-rectangle-annotate
+      label="First Annotation"
+      key="first"
+    ></pl-rectangle-annotate>
+    <pl-rectangle-annotate
+      label="Second Annotation"
+      key="second"
+    ></pl-rectangle-annotate>
 </pl-image-annotate>
+  </div>
+</div>
+
+<div class="card my-2">
+  <div class="card-header">Part 2</div>
+  <div class="card-body">
+    <pl-question-panel>
+    <p>Both the annotation element itself and each annotation type can be customized: By setting
+      the <code>width</code> and <code>height</code> attributes in <code>pl-image-annotate</code>,
+      the canvas area can be resized. Note that the canvas height is automatically adjusted to 
+      preserve the aspect ratio of uploaded images.</p>
+    <p>Annotation types can be customized by setting the <code>color</code>, <code>width</code>,
+      <code>height</code>, <code>font-size</code>, and <code>border-width</code> attributes.
+      By default, all annotation rectangles are <code>resizable</code>, but this can be disabled.</p>
+    </pl-question-panel>
+    <pl-image-annotate answer-name="q1" width="500" height="300">
+      <pl-rectangle-annotate
+        label="Red Annotation"
+        key="red"
+        color="red"
+        width="100"
+        height="100"
+        resizable="true"
+      ></pl-rectangle-annotate>
+      <pl-rectangle-annotate
+        label="Non-resizable Blue Annotation"
+        key="no-resize"
+        color="blue"
+        width="200"
+        height="100"
+        resizable="false"
+      ></pl-rectangle-annotate>
+      <pl-rectangle-annotate
+        label="Large Annotation"
+        key="large"
+        color="green"
+        width="150"
+        height="150"
+        font-size="25"
+        border-width="5"
+      ></pl-rectangle-annotate>
+    </pl-image-annotate>
+  </div>
+</div>
+
+<div class="card my-2">
+  <div class="card-header">Part 3</div>
+  <div class="card-body">
+    <pl-question-panel>
+    <p>By default, annotations are not <code>required</code>, but this attribute can be set to
+    automatically mark submissions as invalid if a specific type is missing. This can be a useful
+    setting to simplify auto-grading scripts.</p>
+    <p>Auto-grading annotated images is not trivial because student-uploaded images such as
+    screenshots or photos might have arbitrary sizes and aspect ratios. The README for this element
+    contains some examples how Optical Character Recognition (OCR) libraries or other tools could
+    be set up to process annotated images automatically.
+    </p>
+    </pl-question-panel>
+    <pl-image-annotate answer-name="q1" width="500" height="300">
+      <pl-rectangle-annotate
+        label="Required Annotation"
+        key="required"
+        required="true"
+      ></pl-rectangle-annotate>
+    </pl-image-annotate>
+  </div>
+</div>

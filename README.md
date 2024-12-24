@@ -5,11 +5,11 @@ This element was developed by Willi Chang and Patrick Wu. Please carefully test 
 
 If you like this element, you can use it in your own PrairieLearn course by copying the contents of the `elements` folder into your own course repository. After syncing, the element can be used as illustrated by the example question that is also contained in this repository.
 
-# `pl-image-annotate` Element
+## `pl-image-annotate` Element
 
 This element allows students to upload images and mark areas with pre-defined, rectangular annotations. Annotated images can be graded manually, or processed by an external auto-grader (not included in this repository) to add features such as OCR or other image recognition.
 
-#### Example
+### Example
 
 <img src="example.png" width="300">
 
@@ -22,13 +22,13 @@ This element allows students to upload images and mark areas with pre-defined, r
     width="200"
     height="100"
     resizable="True"
-    font_size="16"
-    border_width="3"
+    font-size="16"
+    border-width="3"
   ></pl-rectangle-annotate>
 </pl-image-annotate>
 ```
 
-## Element Attributes
+### Element Attributes
 
 | Attribute      | Type | Description                                  
 |----------------|-------------------------------------------------
@@ -37,26 +37,26 @@ This element allows students to upload images and mark areas with pre-defined, r
 | `height`       | integer (default: `100`) | Default height of the annotated image container in pixels; will be adjusted based on the aspect ratio of the uploaded image 
 
 
-### Sub-Element: `pl-rectangle-annotate`
+#### Sub-Element: `pl-rectangle-annotate`
 
-Each `pl-rectangle-annotate` element nested inside `pl-image-annotate` defines an annotation type. Each type can be customized with attributes for color, default dimensions, resizability, and a text label that is displayed inside the annotation.
+Each `pl-rectangle-annotate` element nested inside `pl-image-annotate` defines an annotation type. Each type can be customized with attributes for color, default dimensions, resizability, and a text label that is displayed next to the annotation.
 
 ### Attributes
 
 | Attribute       | Type | Description          
 |-----------------|------|-----------------------------------------------
 | `key`           | string (required) |  Unique key for the annotation type (can be used for auto-grading; see below)    
-| `label`         | string (required) |  Unique label for the annotation type that is displayed inside the annotation rectangle    
+| `label`         | string (required) |  Label for the annotation type that is displayed next to the annotation rectangle    
 | `required`      | boolean (default: `false`) | If set to `true`, the annotation type is required and student submissions are marked as invalid if the annotation is missing
 | `color`         | string (default: `red`) | Rectangle color (hex or color name)         
 | `width`         | integer (default: `100`) | Default annotation rectangle width in pixels                        
 | `height`        | integer (default: `100`) | Default annotation rectangle height in pixels    
 | `resizable`     | boolean (default: `true`) | If set to `true`, the rectangle can be resized of students       
-| `font_size`     | integer (default: `14`) | Font size for the label that is displayed inside the annotation rectangle   
-| `border_width`  | integer (default: `2`) | Border width for the annotation rectangle   
+| `font-size`     | integer (default: `14`) | Font size for the label that is displayed next to the annotation rectangle   
+| `border-width`  | integer (default: `2`) | Border width for the annotation rectangle   
 
 
-## Image Processing for Auto-grading Annotations
+### Image Processing for Auto-grading Annotations
 
 The element stores all submitted annotations in data['submitted_answer'] in a base64 format, which allows access to both the full image and individual annotations. The following code illustrates how to access the data in a `server.py` script:
 
@@ -119,7 +119,6 @@ def parse(data):
 				lang='eng',
 				builder=pyocr.builders.TextBuilder()
 			)
-
       # Replace printing with further grading steps
 			print(text)
 		else:
