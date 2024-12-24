@@ -14,17 +14,21 @@ This element allows students to upload images and mark areas with pre-defined, r
 <img src="example.png" width="300">
 
 ```html
-<pl-image-annotate answer-name="solution" width="500">
-  <pl-rectangle-annotate
-    label="Destination MAC"
-    key="destination_mac"
-    color="#FF0000"
-    width="200"
-    height="100"
-    resizable="True"
-    font-size="16"
-    border-width="3"
-  ></pl-rectangle-annotate>
+  <pl-image-annotate answer-name="solution" width="600">
+    <pl-rectangle-annotate
+      key="petal"
+      label="Petal"
+    ></pl-rectangle-annotate>
+    <pl-rectangle-annotate
+      key="stigma"
+      label="Stigma"
+      color="yellow"
+    ></pl-rectangle-annotate>
+    <pl-rectangle-annotate
+      key="anther"
+      label="Anther"
+      color="green"
+    ></pl-rectangle-annotate>
 </pl-image-annotate>
 ```
 
