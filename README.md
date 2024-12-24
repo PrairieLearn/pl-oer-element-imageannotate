@@ -62,7 +62,7 @@ Each `pl-rectangle-annotate` element nested inside `pl-image-annotate` defines a
 
 ### Image Processing for Auto-grading Annotations
 
-The element stores all submitted annotations in data['submitted_answer'] in a base64 format, which allows access to both the full image and individual annotations. The following code illustrates how to access the data in a `server.py` script:
+The element stores all submitted annotations in `data['submitted_answer']`, encoded in base64. Both the full uploaded image and the cropped areas covered by individual annotations can be accessed from there. The following code illustrates how to access the data in a `server.py` script:
 
 ```python
 import json
