@@ -186,7 +186,7 @@
         color: this.getColorFromAttribute(annotation.color),
         label: annotation.label,
         annotation_name: annotation.annotation_name,
-        resizable: annotation.resizable,
+        resizable: (annotation.resizable === 'true'),
         font_size: parseInt(annotation.font_size, 10) || 14,
         border_width: parseInt(annotation.border_width, 10) || 2,
       };
