@@ -221,7 +221,7 @@
         if (clickedAnnotation) {
           // Check if the click is near an edge for resizing
           const direction = this.getResizeDirection(clickedAnnotation, pos);
-          if (direction) {
+          if (direction && clickedAnnotation.resizable) {
             this.resizing = true;
             this.currentlyResizing = clickedAnnotation;
             this.resizeDirection = direction;
