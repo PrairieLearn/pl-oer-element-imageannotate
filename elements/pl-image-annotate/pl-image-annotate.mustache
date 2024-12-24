@@ -1,0 +1,72 @@
+<script>
+$(() => {
+  new window.PLImageAnnotate("{{uuid}}", {
+    acceptedFiles: {{&accepted_file_types_json}}, // ['.jpg', '.jpeg', '.png', '.gif']
+    selectableColors: {{&selectable_colors_json}}, // [{'name': 'Black', 'hex': '#000000'}, ...]
+    width: "{{width}}",
+    height: "{{height}}",
+    rectangleAnnotations: {{&rectangle_annotations_json}} // Pass rectangle annotations
+  });
+});
+</script>
+
+{{#question}}
+<div id="file-upload-{{uuid}}">
+  <div class="file-upload-status" style="margin-top: 1ex;">
+    <div class="card mb-4">
+      <ul class="list-group list-group-flush">
+        <!-- Canvas for Image and Annotations -->
+        <li class="list-group-item">
+          <div class="canvas-container" style="position: relative;">
+            <canvas id="annotate-canvas-{{uuid}}"></canvas>
+            {{#show_info}}
+              <a role="button" class="btn btn-light border d-flex align-items-center justify-content-center mb-2" 
+                style="position: absolute; right: 10px; top: 10px;"
+                data-toggle="popover" data-html="true" title="Info" data-content="{{info}}" data-placement="auto" data-trigger="focus" tabindex="0">
+                <i class="fa fa-question-circle" aria-hidden="true"></i>
+              </a>
+            {{/show_info}}
+          </div>
+        </li>
+        <!-- Rectangle Annotation Buttons -->
+        <li class="list-group-item rectangle-annotations-container">
+          <div class="rectangle-annotations">
+            {{#rectangleAnnotations}}
+            <button type="button" class="btn btn-primary mr-2 mb-2" data-type="{{type}}">
+              {{label}}
+            </button>
+            {{/rectangleAnnotations}}
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div class="messages"></div>
+  <input type="hidden" name="{{name}}" data-skip-unload-check="true">
+  <div class="upload-dropzone d-flex align-items-center justify-content-center p-3 mb-3 rounded">
+    <div class="text-center dz-message">
+      Drop image files here or click to upload.
+      <br/>
+      <small>Only image files (jpg, jpeg, png, gif) are accepted&mdash;others will be ignored.</small>
+    </div>
+  </div>
+</div>
+{{/question}}
+
+{{#submission}}
+<div style="width: {{width}}px;">
+  <img src="{{submitted_file_url}}" style="width: 100%; margin-bottom: 10px;">
+</div>
+{{/submission}}
+
+{{#parse_error}}
+    <div class="alert alert-danger" role="alert">
+        {{parse_error}}
+    </div>
+{{/parse_error}}
+
+{{#format}}
+<p>
+    {{hint}}
+</p>
+{{/format}}

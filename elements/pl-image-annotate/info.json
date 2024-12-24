@@ -1,0 +1,8 @@
+{
+  "controller": "pl-image-annotate.py",
+  "dependencies": {
+    "elementScripts": ["pl-image-annotate.js"],
+    "elementStyles": ["pl-image-annotate.css"],
+    "nodeModulesScripts": ["lodash/lodash.min.js", "dropzone/dist/dropzone.js"]
+  }
+}

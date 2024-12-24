@@ -1,0 +1,43 @@
+/* Upload Dropzone Styling */
+[id^='file-upload'] .upload-dropzone {
+	min-height: 15ex;
+	background-color: #fafdff;
+	border: 2px dashed #0087f7;
+}
+
+[id^='file-upload'] .upload-dropzone.dz-clickable {
+	cursor: pointer;
+}
+
+[id^='file-upload'] .upload-dropzone.dz-drag-hover {
+	background-color: #d9edf7;
+	border-style: solid;
+}
+
+/* Canvas Styling */
+[id^='file-upload'] .canvas-container {
+	position: relative;
+}
+
+[id^='file-upload'] .canvas-container canvas {
+	border: 1px solid #ddd;
+	max-width: 100%;
+	height: auto;
+	cursor: default;
+	/* Default cursor */
+}
+
+/* Rectangle Annotation Buttons Styling */
+[id^='file-upload'] .rectangle-annotations-container {
+	display: flex;
+	flex-wrap: wrap;
+}
+
+[id^='file-upload'] .rectangle-annotations-container .rectangle-annotations .btn {
+	min-width: 100px;
+}
+
+/* Warning Messages Styling */
+[id^='file-upload'] .messages .alert-warning {
+	margin-top: 10px;
+}
