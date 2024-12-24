@@ -11,7 +11,7 @@ This element allows students to upload images and mark areas with pre-defined, r
 
 ### Example
 
-<img src="example.png" width="300">
+<img src="example.png" width="500">
 
 ```html
   <pl-image-annotate answer-name="solution" width="600">
