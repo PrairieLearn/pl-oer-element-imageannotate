@@ -186,6 +186,7 @@
         color: this.getColorFromAttribute(annotation.color),
         label: annotation.label,
         annotation_name: annotation.annotation_name,
+        resizable: annotation.resizable,
         font_size: parseInt(annotation.font_size, 10) || 14,
         border_width: parseInt(annotation.border_width, 10) || 2,
       };
@@ -268,7 +269,7 @@
           const hoveredAnnotation = this.getAnnotationAtPos(pos);
           if (hoveredAnnotation) {
             const direction = this.getResizeDirection(hoveredAnnotation, pos);
-            if (direction) {
+            if (direction && hoveredAnnotation.resizable) {
               this.canvas.style.cursor = this.getCursorForDirection(direction);
             } else {
               this.canvas.style.cursor = 'move';
@@ -547,7 +548,8 @@
           });
           this.saveCanvasAndAnnotations(); // Add this line to save after each render
         };
-        img.src = this.files[0].contents;
+        if (this.files[0])
+          img.src = this.files[0].contents;
       }
     }
 
