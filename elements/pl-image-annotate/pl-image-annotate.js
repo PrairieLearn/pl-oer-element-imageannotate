@@ -68,6 +68,13 @@
 
     initializeTemplate() {
       const $dropTarget = this.element.find('.upload-dropzone');
+      this.$canvasContainer = this.element.find('.pl-image-annotate-canvas-container');
+
+      if (this.files.length > 0) {
+        this.$canvasContainer.show();
+      } else {
+        this.$canvasContainer.hide();
+      }
 
       // Initialize Dropzone with previews disabled
       $dropTarget.dropzone({
@@ -116,6 +123,8 @@
       reader.onload = (e) => {
         const img = new Image();
         img.onload = () => {
+          if (this.$canvasContainer) this.$canvasContainer.show();
+
           // Adjust canvas size based on image
           this.canvas.width = this.canvasWidth;
           this.canvas.height = (img.height / img.width) * this.canvasWidth;
@@ -185,6 +194,9 @@
         height: rectHeight,
         color: this.getColorFromAttribute(annotation.color),
         label: annotation.label,
+        label_position: annotation.label_position || 'right',
+        label_bg_opacity: (annotation.label_bg_opacity ?? 0),
+        label_auto_boundary: (annotation.label_auto_boundary ?? false),
         annotation_name: annotation.annotation_name,
         resizable: (annotation.resizable === 'true'),
         font_size: parseInt(annotation.font_size, 10) || 14,
@@ -244,6 +256,7 @@
 
         if (this.resizing && this.currentlyResizing) {
           this.resizeAnnotation(this.currentlyResizing, pos);
+          this.constrainAnnotationWithinCanvas(this.currentlyResizing);
           this.renderAnnotations();
           return;
         }
@@ -253,15 +266,8 @@
           this.currentlyDragging.x = pos.x - this.dragOffsetX;
           this.currentlyDragging.y = pos.y - this.dragOffsetY;
 
-          // Constrain the rectangle within canvas boundaries including label
-          if (this.currentlyDragging.x < 0)
-            this.currentlyDragging.x = 0;
-          if (this.currentlyDragging.y < 0)
-            this.currentlyDragging.y = 0;
-          if (this.currentlyDragging.x + this.currentlyDragging.width > this.canvas.width)
-            this.currentlyDragging.x = this.canvas.width - this.currentlyDragging.width;
-          if (this.currentlyDragging.y + this.currentlyDragging.height > this.canvas.height)
-            this.currentlyDragging.y = this.canvas.height - this.currentlyDragging.height;
+          // Constrain rectangle + label within the canvas.
+          this.constrainAnnotationWithinCanvas(this.currentlyDragging);
 
           this.renderAnnotations();
         } else {
@@ -312,9 +318,12 @@
 
     getMousePos(evt) {
       const rect = this.canvas.getBoundingClientRect();
+      // Account for CSS scaling (e.g., max-width: 100%; height: auto).
+      const scaleX = this.canvas.width / rect.width;
+      const scaleY = this.canvas.height / rect.height;
       return {
-        x: evt.clientX - rect.left,
-        y: evt.clientY - rect.top
+        x: (evt.clientX - rect.left) * scaleX,
+        y: (evt.clientY - rect.top) * scaleY,
       };
     }
 
@@ -323,43 +332,9 @@
       for (let i = this.annotations.length - 1; i >= 0; i--) {
         const ann = this.annotations[i];
 
-        // Calculate label dimensions
-        const lines = ann.label ? ann.label.split(/&#10;|&#xA;|\n/) : [];
-        this.context.font = `${ann.font_size}px Arial`;
-        const labelWidth = lines.reduce((maxWidth, line) => {
-          const lineWidth = this.context.measureText(line).width;
-          return Math.max(maxWidth, lineWidth);
-        }, 0);
-        const labelHeight = lines.length * ann.font_size + 10; 
-        const drawAbove = ann.y - 10 - labelHeight >= 0;
+        const { minX, maxX, minY, maxY } = this.getAnnotationBounds(ann);
 
-        // Determine label position
-        let labelX = ann.x;
-        let labelY = drawAbove ? ann.y - labelHeight - 10 : ann.y + ann.height + 10;
-
-        // Create a combined bounding box for the rectangle and label
-        let minX = Math.min(ann.x, labelX);
-        let maxX = Math.max(ann.x + ann.width, labelX + labelWidth);
-        let minY = Math.min(ann.y, labelY);
-        let maxY = Math.max(ann.y + ann.height, labelY + labelHeight);
-
-        // Expand clickable area for small rectangles
-        const buffer = 1; // Pixels to expand the clickable area
-        const minSize = 10; // Threshold for small rectangles
-
-        if (ann.width < minSize || ann.height < minSize) {
-          minX -= buffer;
-          maxX += buffer;
-          minY -= buffer;
-          maxY += buffer;
-        }
-
-        if (
-          pos.x >= minX &&
-          pos.x <= maxX &&
-          pos.y >= minY &&
-          pos.y <= maxY
-        ) {
+        if (pos.x >= minX && pos.x <= maxX && pos.y >= minY && pos.y <= maxY) {
           return ann;
         }
       }
@@ -468,17 +443,12 @@
           break;
       }
 
-      // Calculate label height
-      const labelLines = annotation.label ? annotation.label.split(/&#10;|&#xA;|\n/).length : 0;
-      const labelHeight = labelLines * annotation.font_size + 10; // 10 for padding
-
       // Ensure rectangle and label stay within canvas boundaries
       if (annotation.x < 0) {
         annotation.width += annotation.x;
         annotation.x = 0;
       }
       if (annotation.y < 0) {
-        annotation.height += annotation.y - labelHeight;
         annotation.y = 0;
       }
       if (annotation.x + annotation.width > this.canvas.width) {
@@ -517,31 +487,24 @@
             if (ann.label) {
               this.context.fillStyle = ann.color;
               this.context.font = `${ann.font_size}px Arial`;
-              
-              // Split the label by newline characters
-              const lines = ann.label.split(/&#10;|&#xA;|\n/);
-              
-              // Calculate total label height
-              const totalLabelHeight = lines.length * ann.font_size + 10; // 10 for padding
 
-              // Determine if there's enough space above the rectangle
-              let labelYPosition = ann.y - 10;
-              let drawAbove = true;
+              const labelLayout = this.getLabelLayout(ann);
+              if (labelLayout) {
+                // White backing so label is readable on any image.
+                const prevFill = this.context.fillStyle;
+                const opacityRaw = Number.isFinite(ann.label_bg_opacity) ? ann.label_bg_opacity : parseFloat(ann.label_bg_opacity);
+                const opacity = Number.isFinite(opacityRaw) ? Math.max(0, Math.min(1, opacityRaw)) : 0;
+                this.context.fillStyle = `rgba(255, 255, 255, ${opacity})`;
+                this.context.fillRect(labelLayout.x, labelLayout.y, labelLayout.width, labelLayout.height);
+                this.context.fillStyle = prevFill;
 
-              if (labelYPosition - totalLabelHeight < 0) {
-                // Not enough space above; draw label below the rectangle
-                labelYPosition = ann.y + ann.height + 10;
-                drawAbove = false;
+                const prevBaseline = this.context.textBaseline;
+                this.context.textBaseline = 'top';
+                labelLayout.lines.forEach((line, index) => {
+                  this.context.fillText(line, labelLayout.textX, labelLayout.textY + index * ann.font_size);
+                });
+                this.context.textBaseline = prevBaseline;
               }
-
-              // Draw each line separately at the computed position
-              lines.forEach((line, index) => {
-                if (drawAbove) {
-                  this.context.fillText(line, ann.x, labelYPosition - ((lines.length - 1 - index) * ann.font_size));
-                } else {
-                  this.context.fillText(line, ann.x, labelYPosition + (index + 0.6) * ann.font_size);
-                }
-              });
             }
 
             // Note: Resize handles are no longer drawn
@@ -598,6 +561,150 @@
         0, 0, annotation.width, annotation.height
       );
       return annotationCanvas.toDataURL();
+    }
+
+    getLabelLayout(annotation) {
+      if (!annotation.label) return null;
+
+      // Keep rendering and hit-testing consistent.
+      const lines = annotation.label.split(/&#10;|&#xA;|\n/);
+      this.context.font = `${annotation.font_size}px Arial`;
+
+      const textWidth = lines.reduce((maxWidth, line) => {
+        const lineWidth = this.context.measureText(line).width;
+        return Math.max(maxWidth, lineWidth);
+      }, 0);
+
+      const textHeight = lines.length * annotation.font_size;
+      const padX = 6;
+      const padY = 4;
+      const width = textWidth + padX * 2;
+      const height = textHeight + padY * 2;
+      const pad = 8;
+
+      const requested = (annotation.label_position || 'right').toString().trim().toLowerCase();
+      const valid = new Set(['top', 'bottom', 'left', 'right']);
+      const position = valid.has(requested) ? requested : 'right';
+
+      const autoBoundary = this.isLabelAutoBoundaryEnabled(annotation);
+
+      const centerX = annotation.x + (annotation.width - width) / 2;
+      const centerY = annotation.y + (annotation.height - height) / 2;
+
+      const placementFor = (pos) => {
+        switch (pos) {
+          case 'left':
+            return { x: annotation.x - width - pad, y: centerY };
+          case 'right':
+            return { x: annotation.x + annotation.width + pad, y: centerY };
+          case 'top':
+            return { x: centerX, y: annotation.y - height - pad };
+          case 'bottom':
+            return { x: centerX, y: annotation.y + annotation.height + pad };
+          default:
+            return { x: annotation.x + annotation.width + pad, y: centerY };
+        }
+      };
+
+      const opposite = (pos) => {
+        switch (pos) {
+          case 'left':
+            return 'right';
+          case 'right':
+            return 'left';
+          case 'top':
+            return 'bottom';
+          case 'bottom':
+            return 'top';
+          default:
+            return 'left';
+        }
+      };
+
+      let { x, y } = placementFor(position);
+
+      if (autoBoundary) {
+        // If the requested position would push the label off-canvas, try the opposite side.
+        const offscreen = (xx, yy) => (
+          xx < 0 ||
+          yy < 0 ||
+          xx + width > this.canvas.width ||
+          yy + height > this.canvas.height
+        );
+
+        if (offscreen(x, y)) {
+          ({ x, y } = placementFor(opposite(position)));
+        }
+
+        // Clamp within canvas as a last resort.
+        if (x < 0) x = 0;
+        if (y < 0) y = 0;
+        if (x + width > this.canvas.width) x = Math.max(0, this.canvas.width - width);
+        if (y + height > this.canvas.height) y = Math.max(0, this.canvas.height - height);
+      }
+
+      return { lines, x, y, width, height, textX: x + padX, textY: y + padY };
+    }
+
+    isLabelAutoBoundaryEnabled(annotation) {
+      const v = annotation.label_auto_boundary;
+      if (typeof v === 'boolean') return v;
+      if (typeof v === 'number') return v !== 0;
+      if (typeof v === 'string') {
+        const s = v.trim().toLowerCase();
+        return s === '1' || s === 'true' || s === 'yes' || s === 'y' || s === 'on';
+      }
+      return false;
+    }
+
+    getAnnotationBounds(annotation) {
+      const labelLayout = this.getLabelLayout(annotation);
+
+      const rectHitPad = Math.max(2, Math.ceil((annotation.border_width || 0) / 2));
+      let minX = annotation.x - rectHitPad;
+      let maxX = annotation.x + annotation.width + rectHitPad;
+      let minY = annotation.y - rectHitPad;
+      let maxY = annotation.y + annotation.height + rectHitPad;
+
+      if (labelLayout) {
+        minX = Math.min(minX, labelLayout.x);
+        maxX = Math.max(maxX, labelLayout.x + labelLayout.width);
+        minY = Math.min(minY, labelLayout.y);
+        maxY = Math.max(maxY, labelLayout.y + labelLayout.height);
+      }
+
+      return { minX, maxX, minY, maxY };
+    }
+
+    getRectBounds(annotation) {
+      const rectHitPad = Math.max(2, Math.ceil((annotation.border_width || 0) / 2));
+      return {
+        minX: annotation.x - rectHitPad,
+        maxX: annotation.x + annotation.width + rectHitPad,
+        minY: annotation.y - rectHitPad,
+        maxY: annotation.y + annotation.height + rectHitPad,
+      };
+    }
+
+    constrainAnnotationWithinCanvas(annotation) {
+      // One adjustment can flip label right<->left; do two passes for stability.
+      for (let pass = 0; pass < 2; pass++) {
+        const bounds = this.isLabelAutoBoundaryEnabled(annotation)
+          ? this.getAnnotationBounds(annotation)
+          : this.getRectBounds(annotation);
+        let dx = 0;
+        let dy = 0;
+
+        if (bounds.minX < 0) dx = -bounds.minX;
+        else if (bounds.maxX > this.canvas.width) dx = this.canvas.width - bounds.maxX;
+
+        if (bounds.minY < 0) dy = -bounds.minY;
+        else if (bounds.maxY > this.canvas.height) dy = this.canvas.height - bounds.maxY;
+
+        if (dx === 0 && dy === 0) break;
+        annotation.x += dx;
+        annotation.y += dy;
+      }
     }
   }
 

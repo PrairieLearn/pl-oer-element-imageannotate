@@ -74,6 +74,49 @@
   <div class="card-header">Part 3</div>
   <div class="card-body">
     <pl-question-panel>
+      <p>
+        Annotation labels can be positioned relative to the rectangle using <code>label-position</code>
+        (<code>top</code>, <code>bottom</code>, <code>left</code>, or <code>right</code>).
+      </p>
+      <p>
+        To improve readability on busy images, you can add a white background behind the label text using
+        <code>label-bg-opacity</code> (0 to 1). If <code>label-auto-boundary</code> is set to <code>true</code>,
+        the label will try to stay on the canvas by flipping/clamping when it would otherwise render offscreen.
+        Try dragging an annotation near the edge to see this behavior.
+      </p>
+    </pl-question-panel>
+
+    <pl-image-annotate answer-name="q3" width="600" height="200">
+      <pl-rectangle-annotate
+        label="Top label (opaque bg)"
+        key="label-top"
+        color="orange"
+        label-position="top"
+        label-bg-opacity="1"
+      ></pl-rectangle-annotate>
+      <pl-rectangle-annotate
+        label="Left label (semi bg)"
+        key="label-left"
+        color="green"
+        label-position="left"
+        label-bg-opacity="0.6"
+      ></pl-rectangle-annotate>
+      <pl-rectangle-annotate
+        label="Right label (auto boundary)"
+        key="label-auto"
+        color="blue"
+        label-position="right"
+        label-auto-boundary="true"
+        label-bg-opacity="0.8"
+      ></pl-rectangle-annotate>
+    </pl-image-annotate>
+  </div>
+</div>
+
+<div class="card my-2">
+  <div class="card-header">Part 4</div>
+  <div class="card-body">
+    <pl-question-panel>
     <p>By default, annotations are not <code>required</code>, but this attribute can be set to
     automatically mark submissions as invalid if a specific type is missing. This can be a useful
     setting to simplify auto-grading scripts.</p>
@@ -83,7 +126,7 @@
     be set up to process annotated images automatically.
     </p>
     </pl-question-panel>
-    <pl-image-annotate answer-name="q3">
+    <pl-image-annotate answer-name="q4">
       <pl-rectangle-annotate
         label="Required Annotation"
         key="required"

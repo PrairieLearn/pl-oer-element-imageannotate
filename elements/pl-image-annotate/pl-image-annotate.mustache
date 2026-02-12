@@ -17,15 +17,8 @@ $(() => {
       <ul class="list-group list-group-flush">
         <!-- Canvas for Image and Annotations -->
         <li class="list-group-item">
-          <div class="canvas-container" style="position: relative;">
+          <div class="canvas-container pl-image-annotate-canvas-container" style="position: relative;">
             <canvas id="annotate-canvas-{{uuid}}"></canvas>
-            {{#show_info}}
-              <a role="button" class="btn btn-light border d-flex align-items-center justify-content-center mb-2" 
-                style="position: absolute; right: 10px; top: 10px;"
-                data-toggle="popover" data-html="true" title="Info" data-content="{{info}}" data-placement="auto" data-trigger="focus" tabindex="0">
-                <i class="fa fa-question-circle" aria-hidden="true"></i>
-              </a>
-            {{/show_info}}
           </div>
         </li>
         <!-- Rectangle Annotation Buttons -->
@@ -37,6 +30,12 @@ $(() => {
             </button>
             {{/rectangleAnnotations}}
           </div>
+          {{#show_info}}
+            <a role="button" class="btn btn-light border d-flex align-items-center justify-content-center pl-image-annotate-info"
+              data-toggle="popover" data-html="true" title="Info" data-content="{{info}}" data-placement="auto" data-trigger="focus" tabindex="0">
+              <i class="fa fa-question-circle" aria-hidden="true"></i>
+            </a>
+          {{/show_info}}
         </li>
       </ul>
     </div>

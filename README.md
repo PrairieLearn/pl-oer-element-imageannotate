@@ -58,6 +58,9 @@ Each `pl-rectangle-annotate` element nested inside `pl-image-annotate` defines a
 | `resizable`     | boolean (default: `true`) | If set to `true`, the rectangle can be resized of students       
 | `font-size`     | integer (default: `14`) | Font size for the label that is displayed next to the annotation rectangle   
 | `border-width`  | integer (default: `2`) | Border width for the annotation rectangle   
+| `label-position` | string (default: `right`) | Where to place the label relative to the rectangle; one of `top`, `bottom`, `left`, `right` 
+| `label-bg-opacity` | number (default: `0`) | Opacity for the white label background rectangle (range `0` to `1`) 
+| `label-auto-boundary` | boolean (default: `false`) | If `true`, tries to keep the label on-canvas by flipping/clamping when it would render offscreen 
 
 
 ### Image Processing for Auto-grading Annotations
