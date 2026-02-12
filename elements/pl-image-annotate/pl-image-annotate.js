@@ -194,9 +194,9 @@
         height: rectHeight,
         color: this.getColorFromAttribute(annotation.color),
         label: annotation.label,
-        label_position: annotation.label_position || 'right',
+        label_position: annotation.label_position || 'top',
         label_bg_opacity: (annotation.label_bg_opacity ?? 0),
-        label_auto_boundary: (annotation.label_auto_boundary ?? false),
+        label_auto_boundary: (annotation.label_auto_boundary ?? true),
         annotation_name: annotation.annotation_name,
         resizable: (annotation.resizable === 'true'),
         font_size: parseInt(annotation.font_size, 10) || 14,
@@ -582,7 +582,7 @@
       const height = textHeight + padY * 2;
       const pad = 8;
 
-      const requested = (annotation.label_position || 'right').toString().trim().toLowerCase();
+      const requested = (annotation.label_position || 'top').toString().trim().toLowerCase();
       const valid = new Set(['top', 'bottom', 'left', 'right']);
       const position = valid.has(requested) ? requested : 'right';
 

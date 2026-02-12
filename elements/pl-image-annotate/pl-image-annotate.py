@@ -58,9 +58,9 @@ def extract_rectangle_annotations(element) -> list[dict]:
             'resizable': rect.get('resizable', 'true'),
             'required': rect.get('required', 'false'),
             'label': label,
-            'label_position': rect.get('label-position', 'right'),
+            'label_position': rect.get('label-position', 'top'),
             'label_bg_opacity': rect.get('label-bg-opacity', rect.get('label-background-opacity', '0')),
-            'label_auto_boundary': rect.get('label-auto-boundary', 'false'),
+            'label_auto_boundary': rect.get('label-auto-boundary', 'true'),
             'key': key,
             'annotation_name': annotation_name,
             'font_size': rect.get('font-size', '14'),
@@ -68,13 +68,13 @@ def extract_rectangle_annotations(element) -> list[dict]:
         }
 
         # Normalize label_position to a safe value
-        lp = (annotation.get('label_position') or 'right').strip().lower()
+        lp = (annotation.get('label_position') or 'top').strip().lower()
         if lp not in {'top', 'bottom', 'left', 'right'}:
-            lp = 'right'
+            lp = 'top'
         annotation['label_position'] = lp
 
         # Normalize label_auto_boundary to bool
-        lab = (annotation.get('label_auto_boundary') or 'false').strip().lower()
+        lab = (annotation.get('label_auto_boundary') or 'true').strip().lower()
         annotation['label_auto_boundary'] = lab in {'1', 'true', 'yes', 'y', 'on'}
 
         # Normalize label_bg_opacity to [0, 1]
