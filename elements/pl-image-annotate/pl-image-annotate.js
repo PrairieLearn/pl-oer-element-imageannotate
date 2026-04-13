@@ -24,7 +24,6 @@
         : options.rectangleAnnotations || [];
       this.canvasWidth = parseInt(options.width, 10) || 500;
       this.canvasHeight = parseInt(options.height, 10) || 100;
-      console.log(`Canvas Width Option Received: ${this.canvasWidth}px`);
 
       const elementId = '#file-upload-' + uuid;
       this.element = $(elementId);
@@ -90,9 +89,7 @@
           this.dropzone = $dropTarget[0].dropzone;
           this.dropzone.on('addedfile', (file) => {
             const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
-            console.log('Uploaded file extension:', fileExtension);
             const isAllowed = this.acceptedFilesLowerCase.includes(fileExtension);
-            console.log('Is allowed:', isAllowed);
 
             if (!isAllowed) {
               this.addWarningMessage(
@@ -155,7 +152,7 @@
       this.rectangleConfigs.forEach((annotation) => {
         const labelWithLineBreaks = annotation.label.replace(/&#10;|&#xA;|\n/g, '<br>');
         const $btn = $(`
-          <button type="button" class="btn btn-primary mr-2 mb-2" data-type="${annotation.type}">
+          <button type="button" class="btn btn-primary me-2 mb-2" data-type="${annotation.type}">
             ${labelWithLineBreaks}
           </button>
         `);
@@ -517,6 +514,10 @@
     }
 
     saveCanvasAndAnnotations() {
+      if (this.files.length == 0) {
+        this.element.find('input').val("");
+        return;
+      }
       const canvasData = this.canvas.toDataURL();
       const annotationData = this.annotations.reduce((acc, annotation) => {
         acc[annotation.annotation_name] = this.getAnnotationContent(annotation);
