@@ -6,22 +6,24 @@ import prairielearn as pl
 
 # Define a mapping from color names to hex codes
 COLOR_NAME_TO_HEX = {
-    'black': '#000000',
-    'red': '#FF0000',
-    'blue': '#0000FF',
-    'green': '#00FF00',
-    'orange': '#FFA500',
-    'purple': '#800080',
-    'yellow': '#FFFF00',
-    'pink': '#FFC0CB',
-    'gray': '#808080',
+    "black": "#000000",
+    "red": "#FF0000",
+    "blue": "#0000FF",
+    "green": "#00FF00",
+    "orange": "#FFA500",
+    "purple": "#800080",
+    "yellow": "#FFFF00",
+    "pink": "#FFC0CB",
+    "gray": "#808080",
     # Add more colors as needed
 }
 MUSTACHE_FILE = "pl-image-annotate.mustache"
 SHOW_HELP_TEXT_DEFAULT = True
 
+
 def add_format_error(data: pl.QuestionData, error_string: str) -> None:
     pl.add_files_format_error(data, error_string)
+
 
 def extract_rectangle_annotations(element) -> list[dict]:
     """
@@ -31,18 +33,18 @@ def extract_rectangle_annotations(element) -> list[dict]:
         List of dictionaries with rectangle annotation properties.
     """
     annotations = []
-    for rect in element.findall('pl-rectangle-annotate'):
+    for rect in element.findall("pl-rectangle-annotate"):
         # Retrieve the label and key attributes
-        key = rect.get('key', '')
+        key = rect.get("key", "")
         key = html.unescape(key)
-        label = rect.get('label', key)
+        label = rect.get("label", key)
         label = html.unescape(label)
 
         # Derive type and answer_name from label
         annotation_name = key  # Use the same identifier for answer_name
 
         # Retrieve the color attribute
-        color_attr = rect.get('color', 'red')  # Default to red if not specified
+        color_attr = rect.get("color", "red")  # Default to red if not specified
 
         # If color is a name, convert it to hex; otherwise, keep as is
         if color_attr.lower() in COLOR_NAME_TO_HEX:
@@ -51,41 +53,44 @@ def extract_rectangle_annotations(element) -> list[dict]:
             color = color_attr  # Assume it's a valid hex code
 
         annotation = {
-            'type': key,
-            'color': color,
-            'width': rect.get('width', '100'),
-            'height': rect.get('height', '100'),
-            'resizable': rect.get('resizable', 'true'),
-            'required': rect.get('required', 'false'),
-            'label': label,
-            'label_position': rect.get('label-position', 'top'),
-            'label_bg_opacity': rect.get('label-bg-opacity', rect.get('label-background-opacity', '0')),
-            'label_auto_boundary': rect.get('label-auto-boundary', 'true'),
-            'key': key,
-            'annotation_name': annotation_name,
-            'font_size': rect.get('font-size', '14'),
-            'border_width': rect.get('border-width', '2'),
+            "type": key,
+            "color": color,
+            "width": rect.get("width", "100"),
+            "height": rect.get("height", "100"),
+            "resizable": rect.get("resizable", "true"),
+            "required": rect.get("required", "false"),
+            "label": label,
+            "label_position": rect.get("label-position", "top"),
+            "label_bg_opacity": rect.get(
+                "label-bg-opacity", rect.get("label-background-opacity", "0")
+            ),
+            "label_auto_boundary": rect.get("label-auto-boundary", "true"),
+            "key": key,
+            "annotation_name": annotation_name,
+            "font_size": rect.get("font-size", "14"),
+            "border_width": rect.get("border-width", "2"),
         }
 
         # Normalize label_position to a safe value
-        lp = (annotation.get('label_position') or 'top').strip().lower()
-        if lp not in {'top', 'bottom', 'left', 'right'}:
-            lp = 'top'
-        annotation['label_position'] = lp
+        lp = (annotation.get("label_position") or "top").strip().lower()
+        if lp not in {"top", "bottom", "left", "right"}:
+            lp = "top"
+        annotation["label_position"] = lp
 
         # Normalize label_auto_boundary to bool
-        lab = (annotation.get('label_auto_boundary') or 'true').strip().lower()
-        annotation['label_auto_boundary'] = lab in {'1', 'true', 'yes', 'y', 'on'}
+        lab = (annotation.get("label_auto_boundary") or "true").strip().lower()
+        annotation["label_auto_boundary"] = lab in {"1", "true", "yes", "y", "on"}
 
         # Normalize label_bg_opacity to [0, 1]
         try:
-            opacity = float(annotation.get('label_bg_opacity', 0))
+            opacity = float(annotation.get("label_bg_opacity", 0))
         except (TypeError, ValueError):
             opacity = 0.0
         opacity = max(0.0, min(1.0, opacity))
-        annotation['label_bg_opacity'] = opacity
+        annotation["label_bg_opacity"] = opacity
         annotations.append(annotation)
     return annotations
+
 
 def prepare(element_html: str, data: pl.QuestionData) -> None:
     element = lxml.html.fragment_fromstring(element_html)
@@ -114,9 +119,11 @@ def prepare(element_html: str, data: pl.QuestionData) -> None:
 
     keys = set()
     for subelement in element.findall("pl-rectangle-annotate"):
-        pl.check_attribs(subelement, subelement_required_attribs, subelement_optional_attribs)
+        pl.check_attribs(
+            subelement, subelement_required_attribs, subelement_optional_attribs
+        )
 
-        key = html.unescape(subelement.get('key', ''))
+        key = html.unescape(subelement.get("key", ""))
         if key in keys:
             raise Exception(f"Duplicate key found: {key}")
         keys.add(key)
@@ -125,10 +132,10 @@ def prepare(element_html: str, data: pl.QuestionData) -> None:
 def render(element_html: str, data: pl.QuestionData) -> str:
     if data["panel"] not in ["question", "submission"]:
         return ""
-    
+
     with open(MUSTACHE_FILE, "r", encoding="utf-8") as f:
         template = f.read()
-    
+
     element = lxml.html.fragment_fromstring(element_html)
     uuid = pl.get_uuid()
 
@@ -143,14 +150,13 @@ def render(element_html: str, data: pl.QuestionData) -> str:
     rectangle_annotations_json = json.dumps(rectangle_annotations, ensure_ascii=False)
 
     if data["panel"] == "question":
-
         # Define accepted file types
-        accepted_file_types = ['.jpg', '.jpeg', '.png', '.gif']
+        accepted_file_types = [".jpg", ".jpeg", ".png", ".gif"]
         accepted_file_types_json = json.dumps(accepted_file_types, allow_nan=False)
 
         # Define selectable colors (name to hex mapping)
         selectable_colors = [
-            {'name': name.capitalize(), 'hex': hex_code}
+            {"name": name.capitalize(), "hex": hex_code}
             for name, hex_code in COLOR_NAME_TO_HEX.items()
         ]
         selectable_colors_json = json.dumps(selectable_colors, allow_nan=False)
@@ -180,26 +186,28 @@ def render(element_html: str, data: pl.QuestionData) -> str:
                 # Add saved state to rectangle_annotations for restoration
                 rectangle_annotations = {
                     "config": rectangle_annotations,
-                    "savedState": saved_state
+                    "savedState": saved_state,
                 }
-                rectangle_annotations_json = json.dumps(rectangle_annotations, ensure_ascii=False)
+                rectangle_annotations_json = json.dumps(
+                    rectangle_annotations, ensure_ascii=False
+                )
             except json.JSONDecodeError:
                 pass
 
         html_params = {
             "name": answer_name,
             "uuid": uuid,
-            "width": width,  
+            "width": width,
             "height": height,
             "rectangle_annotations_json": rectangle_annotations_json,  # Pass rectangle annotations with saved state
             "accepted_file_types_json": accepted_file_types_json,  # Pass accepted file types
             "selectable_colors_json": selectable_colors_json,  # Pass selectable colors
             "question": True,
             "info": info,
-            "show_info": show_help_text
+            "show_info": show_help_text,
         }
         return chevron.render(template, html_params).strip()
-    
+
     elif data["panel"] == "submission":
         submitted_answers = data["submitted_answers"].get(answer_name, None)
 
@@ -213,7 +221,7 @@ def render(element_html: str, data: pl.QuestionData) -> str:
         if not submitted_answers:
             add_format_error(data, "No submitted answer for file upload.")
             return ""
-        
+
         try:
             submitted_answers = json.loads(submitted_answers)
         except json.JSONDecodeError:
@@ -239,42 +247,44 @@ def render(element_html: str, data: pl.QuestionData) -> str:
 
         return chevron.render(template, html_params).strip()
 
+
 def parse(element_html: str, data: pl.QuestionData) -> None:
     element = lxml.html.fragment_fromstring(element_html)
     answer_name = pl.get_string_attrib(element, "answer-name", "")
-
 
     # Get submitted answer or return parse_error if it does not exist
     submitted_answers = data["submitted_answers"].get(answer_name, None)
     if not submitted_answers:
         add_format_error(data, "No submitted answer for file upload.")
         return
-    
+
     required_key = set()
     type_to_label = {}
-    
+
     for subelement in element.findall("pl-rectangle-annotate"):
         required = pl.get_boolean_attrib(subelement, "required", False)
         if required:
             key = subelement.get("key", "")
             required_key.add(key)
             type_to_label[key] = subelement.get("label", "")
-    
+
     saved_data = json.loads(submitted_answers)
     canvas = saved_data.get("canvas", {})
     saved_state = saved_data.get("savedState", {})
     annotations = saved_state.get("annotations", {})
     rectangles = saved_data.get("rectangles", {})
-    
+
     processed_rectangles = {
         key: value.split(",")[1] for key, value in rectangles.items()
     }
 
-    data["submitted_answers"][answer_name] = json.dumps({
-        "canvas": canvas.split(",")[1],
-        "savedState": saved_state,
-        "annotations": processed_rectangles,
-    })
+    data["submitted_answers"][answer_name] = json.dumps(
+        {
+            "canvas": canvas.split(",")[1],
+            "savedState": saved_state,
+            "annotations": processed_rectangles,
+        }
+    )
 
     # Collect keys from annotations
     annotation_keys = {ann.get("type", "") for ann in annotations}
@@ -283,4 +293,6 @@ def parse(element_html: str, data: pl.QuestionData) -> None:
     missing_keys = required_key - annotation_keys
     if missing_keys:
         missing_labels = [type_to_label[key] for key in missing_keys]
-        data["format_errors"][answer_name] = "Missing required annotations: " + ", ".join(missing_labels)
+        data["format_errors"][answer_name] = (
+            "Missing required annotations: " + ", ".join(missing_labels)
+        )
