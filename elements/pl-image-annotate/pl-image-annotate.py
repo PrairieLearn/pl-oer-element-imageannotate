@@ -141,7 +141,7 @@ def render(element_html: str, data: pl.QuestionData) -> str:
 
     answer_name = pl.get_string_attrib(element, "answer-name", "")
 
-    # Extract the 'width' attribute, defaulting to 500if not provided
+    # Extract the 'width' attribute, defaulting to 500 if not provided
     width = pl.get_string_attrib(element, "width", "500")
     height = pl.get_string_attrib(element, "height", "100")
 
